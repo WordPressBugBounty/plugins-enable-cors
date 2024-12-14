@@ -38,7 +38,7 @@ final class AdminPage {
 						add_filter( 'update_footer', array( $this, 'version' ), 11 );
 						echo wp_kses_post( '<div id="' . SLUG . '">Loading scripts. If you are still here, something went wrong.</div>' );
 					},
-					'dashicons-admin-generic',
+					'dashicons-admin-generic'
 				);
 			}
 		);

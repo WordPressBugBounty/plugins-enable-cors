@@ -3,8 +3,8 @@ Contributors: devkabir
 Donate link: https://www.buymeacoffee.com/devkabir011
 Tags: cors, error, fix, enable, ajax
 Requires at least: 4.7
-Tested up to: 6.6
-Stable tag: 1.2.3
+Tested up to: 6.7
+Stable tag: 1.2.4
 Requires PHP: 7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -15,11 +15,8 @@ Please read the plugin description before installing to ensure compatibility and
 
 Are you tired of dealing with pesky CORS errors on your website? Do you want to finally be able to access cross-origin resources with ease? Look no further! This plugin is here to solve all of your CORS issues. With just a few simple clicks, you can enable CORS support on your website and say goodbye to frustrating error messages. Plus, This tool is easy to use and compatible with all major browsers. Don't miss out on this game-changing solution! Try today and revolutionize the way you access cross-origin resources.
 
-### To now ###
 [youtube https://youtu.be/bFru6VCZ7KA]
 
-### From 1.0.0 ###
-[youtube https://youtu.be/HAcE67gnwT8]
 
 ## What is CORS ? ##
 
@@ -49,6 +46,7 @@ Modify the server configuration: If you have access to the server that your Word
 Be aware that modifying the server configuration or adding code to your WordPress website can have unintended consequences, so it's a good idea to test any changes thoroughly before deploying them to a production environment.
 
 ## How does your plugin help with CORS support? ##
+
 This plugin adds support for CORS to your WordPress website, allowing you to specify which domains are allowed to access your website's resources, and which types of requests are allowed. This helps to ensure that your website remains secure while allowing authorized access to resources from other domains.
 
 **If your site is serving data to others, then This plugin will work. Otherwise, do not install this plugin, It will be waste of your time only.**
@@ -59,9 +57,27 @@ This plugin adds support for CORS to your WordPress website, allowing you to spe
 - **Ease of Use**: This plugin is easy to use and compatible with all major browsers.
 - **Excellent Support**: I offer top-notch **paid support** to assist you whenever you need help.
 
-Don't just take these words for it; check out reviews from satisfied users!
-
 Try 'Enable CORS' today and experience the difference!
+
+== Testing Your Setup ==
+
+1. **Source Site**:
+   - Install and activate the **Enable CORS** plugin.
+   - Install and activate the **Cors Tester** plugin.
+
+2. **Target Site**:
+   - Install and activate the **CORS Shortcode Plugin**.
+   - It will add a page with a short code `[cors_display]`
+   - Edit and save the page content as follows:
+     ```php
+     [cors_display base_url="http://source-site.com"]
+     ```
+   - If you don't provide a `base_url`, it will default to the target site’s URL. So cors will be failed.
+
+3. **Testing**:
+   - Visit the page where you added the shortcode. If everything is set up correctly, the current time data from the **Source Site** will be displayed.
+
+For a detailed walkthrough and additional help on testing your configuration, please refer to the following link: [How to Test Your Setup](https://gist.github.com/devkabir/89972aa28d2302cecf13385be1730eda)
 
 
 ## Note to all users ##
@@ -76,7 +92,6 @@ I appreciate your understanding that this project is pursued in my spare time, o
 == Installation ==
 
 1. Install & Activate the plugin through the 'Plugins' screen in WordPress
-1. Plugin redirect you to settings panel.
 
 == Frequently Asked Questions ==
 
@@ -90,12 +105,13 @@ I appreciate your understanding that this project is pursued in my spare time, o
 
 = Plugin is not working on my site. =
 
-I'm sorry to hear that you are experiencing issues with the plugin on your website. If you require assistance with resolving this issue, I recommend placing an order or message via [fiverr](https://www.fiverr.com/share/3Zvz8r) or fill up support form to fix the issue for you. Please provide me with additional details about the issue you are facing so that I can better assist you.
+I'm sorry to hear that you are experiencing issues with the plugin on your website.
 
 == Changelog ==
 
-= 1.2.3 - 22-06-2024 =
+= 1.2.4 - 14-12-2024 =
 * Improved workflow
+* PHP compatibility check till 8.3
 
 ...
 

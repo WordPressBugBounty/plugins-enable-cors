@@ -11,9 +11,9 @@ if ( ! defined( 'Enable\Cors\SLUG' ) ) {
 	exit;
 }
 
+use Enable\Cors\Helpers\Option;
 use Enable\Cors\Helpers\Headers;
 use Enable\Cors\Helpers\Htaccess;
-use Enable\Cors\Helpers\Option;
 
 
 final class Plugin {
@@ -24,15 +24,13 @@ final class Plugin {
 	 *
 	 * @return void
 	 */
-	public static function activate() {
+	public static function activate(): void {
 		// enable plugin's auto-update.
 		self::enable_updates();
 		// set default option.
 		Option::add_default();
 		// modify htaccess.
 		Htaccess::instance()->modify();
-		// redirect you to the settings page after activation.
-		add_action( 'activated_plugin', array( self::class, 'redirect' ) );
 	}
 
 	/**
@@ -40,7 +38,7 @@ final class Plugin {
 	 *
 	 * @return void
 	 */
-	private static function enable_updates() {
+	private static function enable_updates(): void {
 		$auto_updates = (array) get_site_option( 'auto_update_plugins', array() );
 		$plugin       = plugin_basename( FILE );
 		if ( false === in_array( $plugin, $auto_updates, true ) ) {
@@ -54,7 +52,7 @@ final class Plugin {
 	 *
 	 * @return void
 	 */
-	public static function deactivate() {
+	public static function deactivate(): void {
 		self::disable_updates();
 		Htaccess::instance()->restore();
 		Option::delete();
@@ -65,7 +63,7 @@ final class Plugin {
 	 *
 	 * @return void
 	 */
-	private static function disable_updates() {
+	private static function disable_updates(): void {
 		$auto_updates = (array) get_site_option( 'auto_update_plugins', array() );
 		$plugin       = plugin_basename( FILE );
 		$update       = array_diff( $auto_updates, array( $plugin ) );
@@ -73,58 +71,60 @@ final class Plugin {
 	}
 
 	/**
-	 * It redirects to the admin page if the plugin is enabled.
-	 *
-	 * @param string $plugin activated plugin name.
-	 */
-	public static function redirect( string $plugin ) {
-		if ( plugin_basename( FILE ) === $plugin ) {
-			wp_safe_redirect( admin_url( 'admin.php?page=' . SLUG ) );
-			exit();
-		}
-	}
-
-	/**
 	 * Plugin Initiator.
+	 *
+	 * This function is the entry point for the plugin. It sets up the
+	 * admin page and adds the necessary hooks for the plugin to work.
 	 *
 	 * @return void
 	 */
-	public static function init() {
-		// get option.
+	public static function init(): void {
 		if ( is_admin() ) {
-			// add links under plugin name.
+			// Add the settings link to the plugin actions.
 			add_filter( 'plugin_action_links_' . plugin_basename( FILE ), array( self::class, 'actions' ) );
-			// Register admin page.
+			// Initialize the admin page.
 			AdminPage::instance();
 		}
-		add_action(
-			'rest_api_init',
-			function () {
-				// add settings api.
-				SettingsApi::instance();
-			}
-		);
+
+		// Initialize the Settings API.
+		add_action( 'rest_api_init', array( SettingsApi::class, 'instance' ) );
+
+		// Get the option instance.
 		$option = new Option();
 
+		// If the plugin is not enabled or the method is not allowed, return.
 		if ( ! $option->is_enable() || ! $option->is_method_allowed() ) {
 			return;
 		}
 
+		// Add the CORS headers.
 		Headers::add( $option );
+
+		// Remove the default CORS headers from the REST API.
 		add_action(
 			'rest_api_init',
-			function () {
+			static function () {
 				remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+
+				// Add a new filter to add the CORS headers.
 				add_filter(
 					'rest_pre_serve_request',
-					function ( $value ) {
-						Headers::add( new Option() );
+					static function ( $value ) {
+						// Get the option instance.
+						$option = new Option();
 
+						// Add the CORS headers.
+						Headers::add( $option );
+
+						// Return the value.
 						return $value;
 					}
 				);
 			}
 		);
+
+		// Run the upgrade routines.
+		Upgrade::run();
 	}
 
 	/**
@@ -135,11 +135,7 @@ final class Plugin {
 	 * @return array
 	 */
 	public static function actions( array $actions ): array {
-		$actions[] = sprintf(
-			'<a href="%s">%s</a>',
-			esc_url( get_admin_url( null, 'admin.php?page=enable-cors' ) ),
-			esc_attr__( 'Settings', 'enable-cors' )
-		);
+		$actions[] = sprintf( '<a href="%s">%s</a>', esc_url( get_admin_url( null, 'admin.php?page=enable-cors' ) ), esc_attr__( 'Settings', 'enable-cors' ) );
 
 		return $actions;
 	}

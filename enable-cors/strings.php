@@ -75,42 +75,27 @@ return array(
 		'invalidUrl' => esc_attr__( 'Are all URLs valid? Please verify.', 'enable-cors' ),
 	),
 	'thanks'      => array(
-		'title'       => esc_attr__( 'Thank You', 'enable-cors' ),
-		'description' => [
-			'bug'     => esc_attr__( 'Bug fix contributors', 'enable-cors' ),
-			'feature' => esc_attr__( 'Feature request contributors', 'enable-cors' )
-		],
-		'peoples'     => array(
-			'bug'     => [
-				'mehbubrashid' => array(
-					'name'  => esc_attr__( 'Mehbub Rashid', 'enable-cors' ),
-					'image' => esc_attr( '7a692106063b5b14dfe8962e83a738f0' ),
-					'link'  => esc_attr( 'error-404-while-saving-the-settings' ),
-				),
-				'oyvindwe'     => array(
-					'name'  => esc_attr__( 'oyvindwe', 'enable-cors' ),
-					'image' => esc_attr( '56c12316332438bb3dc6435cbe03da02' ),
-					'link'  => esc_attr( 'wrong-value-for-access-control-allow-credentials/' ),
-				),
-			],
-			'feature' => [
-				'kocevskiigorw' => array(
-					'name'  => esc_attr__( 'kocevskiigorw', 'enable-cors' ),
-					'image' => esc_attr( 'f27a92b58dd8e8c810eac8a384d55731' ),
-					'link'  => esc_attr( 'additional-allowed-websites/' ),
-				),
-			]
-		),
-
-	),
-	'sponsors'    => array(
-		'title'       => esc_attr__( 'Sponsors', 'enable-cors' ),
-		'description' => esc_attr__( 'Investors in new features', 'enable-cors' ),
-		'peoples'     => array(
-			'philip' => array(
+		'title'   => esc_attr__( 'Thank You', 'enable-cors' ),
+		'peoples' => array(
+			'philipschoettler' => array(
 				'name'    => esc_attr__( 'Philip Schöttler', 'enable-cors' ),
 				'image'   => esc_attr( '267094f8008173f94e5e5d3e9b912cb5' ),
 				'profile' => esc_attr( 'philipschoettler' ),
+			),
+			'mehbubrashid'     => array(
+				'name'    => esc_attr__( 'Mehbub Rashid', 'enable-cors' ),
+				'image'   => esc_attr( '7a692106063b5b14dfe8962e83a738f0' ),
+				'profile' => esc_attr( 'mehbubrashid' ),
+			),
+			'oyvindwe'         => array(
+				'name'    => esc_attr__( 'oyvindwe', 'enable-cors' ),
+				'image'   => esc_attr( '56c12316332438bb3dc6435cbe03da02' ),
+				'profile' => esc_attr( 'oyvindwe' ),
+			),
+			'kocevskiigorw'    => array(
+				'name'    => esc_attr__( 'kocevskiigorw', 'enable-cors' ),
+				'image'   => esc_attr( 'f27a92b58dd8e8c810eac8a384d55731' ),
+				'profile' => esc_attr( 'kocevskiigorw' ),
 			),
 		),
 

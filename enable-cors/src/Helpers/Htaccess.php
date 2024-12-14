@@ -45,7 +45,7 @@ final class Htaccess {
 	/**
 	 * It modifies the .htaccess file to add headers for allowing fonts and css
 	 */
-	public function modify() {
+	public function modify(): void {
 		$option = new Option();
 		if ( empty( $option->is_enable() ) ) {
 			$this->restore();
@@ -118,7 +118,7 @@ final class Htaccess {
 	/**
 	 * It writes an empty array to the .htaccess file.
 	 */
-	public function restore() {
+	public function restore(): void {
 		$lines = array( '' );
 		$this->write( $lines );
 	}

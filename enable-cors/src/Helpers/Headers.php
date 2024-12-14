@@ -26,7 +26,7 @@ final class Headers {
 	 *
 	 * @return void
 	 */
-	public static function add( Option $option ) {
+	public static function add( Option $option ): void {
 		if ( $option->is_current_origin_allowed() ) {
 			header( 'Access-Control-Allow-Origin: ' . get_http_origin() );
 			header( 'Vary: Origin' );

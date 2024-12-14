@@ -7,28 +7,17 @@ namespace Enable\Cors\Helpers;
 | If this file is called directly, abort.
 |--------------------------------------------------------------------------
 */
-
-use Enable\Cors\Traits\Singleton;
-use WP_Error;
-use const Enable\Cors\SLUG;
-use const Enable\Cors\VERSION;
-
 if ( ! defined( 'Enable\Cors\SLUG' ) ) {
 	exit;
 }
 
+use WP_Error;
+use const Enable\Cors\SLUG;
+use const Enable\Cors\VERSION;
+use Enable\Cors\Traits\Singleton;
 
 /**
  * Handle plugin option.
- *
- * @property array $options
- * @property boolean $enable
- * @property array $allowedHeader
- * @property array $allowedMethods
- * @property array $allowedFor
- * @property boolean $allowCredentials
- * @property boolean $allowImage
- * @property boolean $allowFont
  */
 final class Option {
 
@@ -46,13 +35,13 @@ final class Option {
 	 * @var array
 	 */
 	private const DEFAULT_OPTION = array(
-		'enable'           => false,
-		'allowFont'        => false,
-		'allowImage'       => false,
-		'allowCredentials' => false,
-		'allowedFor'       => array( array( 'value' => '*' ) ),
-		'allowedMethods'   => array( 'GET', 'POST', 'OPTIONS' ),
-		'allowedHeader'    => array(),
+		'enable'            => false,
+		'allow_font'        => false,
+		'allow_image'       => false,
+		'allow_credentials' => false,
+		'allowed_for'       => array( array( 'value' => '*' ) ),
+		'allowed_methods'   => array( 'GET', 'POST', 'OPTIONS' ),
+		'allowed_header'    => array(),
 	);
 	/**
 	 * List of allowed HTTP methods.
@@ -84,28 +73,75 @@ final class Option {
 	 */
 	private const ALLOWED = array(
 		'enable',
-		'allowFont',
-		'allowImage',
-		'allowCredentials',
-		'allowedFor',
-		'allowedMethods',
-		'allowedHeader',
+		'allow_font',
+		'allow_image',
+		'allow_credentials',
+		'allowed_for',
+		'allowed_methods',
+		'allowed_header',
 	);
-	const VKEY            = SLUG . '_version';
+	public const VKEY     = SLUG . '_version';
+	/**
+	 * Array of allowed headers.
+	 *
+	 * @var array
+	 */
+	private $allowed_header;
+
+	/**
+	 * Array of allowed HTTP methods.
+	 *
+	 * @var array
+	 */
+	private $allowed_methods;
+
+	/**
+	 * Array of allowed domains for CORS.
+	 *
+	 * @var array
+	 */
+	private $allowed_for;
+
+	/**
+	 * Whether to allow credentials in CORS requests.
+	 *
+	 * @var bool
+	 */
+	private $allow_credentials;
+
+	/**
+	 * Whether to allow font access in CORS requests.
+	 *
+	 * @var bool
+	 */
+	private $allow_image;
+
+	/**
+	 * Whether to allow image access in CORS requests.
+	 *
+	 * @var bool
+	 */
+	private $allow_font;
+
+	/**
+	 * Whether to enable CORS.
+	 *
+	 * @var bool
+	 */
+	private $enable;
 
 	/**
 	 * Set up options and set defaults.
 	 */
 	public function __construct() {
 		$options = get_option( self::KEY, self::DEFAULT_OPTION );
-		if ( array_key_exists( 'allowedFor', $options ) && gettype( $options['allowedFor'] ) === 'string' ) {
-			$options['allowedFor'] = array(
-				array( 'value' => $options['allowedFor'] ),
+		if ( array_key_exists( 'allowed_for', $options ) && is_string( $options['allowed_for'] ) ) {
+			$options['allowed_for'] = array(
+				array( 'value' => $options['allowed_for'] ),
 			);
 			$this->save( $options );
 		}
 		$this->set_option( $options );
-		$this->options = $options;
 	}
 
 	/**
@@ -119,10 +155,7 @@ final class Option {
 		$validated = $this->validate( $options );
 
 		if ( empty( $validated ) ) {
-			return new WP_Error(
-				'invalid',
-				__( 'Invalid Settings!', 'enable-cors' )
-			);
+			return new WP_Error( 'invalid', __( 'Invalid Settings!', 'enable-cors' ) );
 		}
 
 		return update_option( self::KEY, $validated );
@@ -142,27 +175,27 @@ final class Option {
 			$data,
 			function ( &$value, $key ) {
 				switch ( $key ) {
-					case 'allowedFor':
-						if ( 'array' !== gettype( $value ) || empty( $value ) || in_array( '*', array_column( $value, 'value' ), true ) ) {
-							$value = self::DEFAULT_OPTION['allowedFor'];
+					case 'allowed_for':
+						if ( ! is_array( $value ) || empty( $value ) || in_array( '*', array_column( $value, 'value' ), true ) ) {
+							$value = self::DEFAULT_OPTION['allowed_for'];
 						}
 						$value = array_map( array( $this, 'prepend_value' ), $value );
 						break;
-					case 'allowedMethods':
-						if ( 'array' !== gettype( $value ) ) {
-							$value = self::DEFAULT_OPTION['allowedMethods'];
+					case 'allowed_methods':
+						if ( ! is_array( $value ) ) {
+							$value = self::DEFAULT_OPTION['allowed_methods'];
 						}
 						$value = array_map( 'sanitize_text_field', array_filter( array_intersect( $value, self::METHODS ) ) );
 						break;
-					case 'allowedHeader':
-						if ( 'array' !== gettype( $value ) ) {
-							$value = self::DEFAULT_OPTION['allowedHeader'];
+					case 'allowed_header':
+						if ( ! is_array( $value ) ) {
+							$value = self::DEFAULT_OPTION['allowed_header'];
 						}
 						$value = array_map( 'sanitize_text_field', array_filter( array_intersect( $value, self::HEADERS ) ) );
 						break;
 					default:
 						$value = sanitize_text_field( $value );
-						$value = boolval( $value );
+						$value = (bool) $value;
 						break;
 				}
 			}
@@ -180,7 +213,6 @@ final class Option {
 	 * @return array of extracted data
 	 */
 	private function extract( array $collection, array $keys ): array {
-
 		return array_intersect_key( $collection, array_flip( $keys ) );
 	}
 
@@ -192,13 +224,33 @@ final class Option {
 	 * @return void
 	 */
 	private function set_option( array $options ): void {
-		$this->enable           = array_key_exists( 'enable', $options ) ? $options['enable'] : self::DEFAULT_OPTION['enable'];
-		$this->allowFont        = array_key_exists( 'allowFont', $options ) ? $options['allowFont'] : self::DEFAULT_OPTION['allowFont'];
-		$this->allowImage       = array_key_exists( 'allowImage', $options ) ? $options['allowImage'] : self::DEFAULT_OPTION['allowImage'];
-		$this->allowCredentials = array_key_exists( 'allowCredentials', $options ) ? $options['allowCredentials'] : self::DEFAULT_OPTION['allowCredentials'];
-		$this->allowedFor       = array_key_exists( 'allowedFor', $options ) ? $options['allowedFor'] : self::DEFAULT_OPTION['allowedFor'];
-		$this->allowedMethods   = array_key_exists( 'allowedMethods', $options ) ? $options['allowedMethods'] : self::DEFAULT_OPTION['allowedMethods'];
-		$this->allowedHeader    = array_key_exists( 'allowedHeader', $options ) ? $options['allowedHeader'] : self::DEFAULT_OPTION['allowedHeader'];
+		$this->enable            = array_key_exists( 'enable', $options ) ? $options['enable'] : self::DEFAULT_OPTION['enable'];
+		$this->allow_font        = array_key_exists( 'allow_font', $options ) ? $options['allow_font'] : self::DEFAULT_OPTION['allow_font'];
+		$this->allow_image       = array_key_exists( 'allow_image', $options ) ? $options['allow_image'] : self::DEFAULT_OPTION['allow_image'];
+		$this->allow_credentials = array_key_exists( 'allow_credentials', $options ) ? $options['allow_credentials'] : self::DEFAULT_OPTION['allow_credentials'];
+		$this->allowed_for       = array_key_exists( 'allowed_for', $options ) ? $options['allowed_for'] : self::DEFAULT_OPTION['allowed_for'];
+		$this->allowed_methods   = array_key_exists( 'allowed_methods', $options ) ? $options['allowed_methods'] : self::DEFAULT_OPTION['allowed_methods'];
+		$this->allowed_header    = array_key_exists( 'allowed_header', $options ) ? $options['allowed_header'] : self::DEFAULT_OPTION['allowed_header'];
+	}
+
+	/**
+	 * Adds a default option.
+	 *
+	 * @return void
+	 */
+	public static function add_default(): void {
+		update_option( self::KEY, self::DEFAULT_OPTION );
+		update_option( self::VKEY, VERSION );
+	}
+
+	/**
+	 * Delete options
+	 *
+	 * @return void
+	 */
+	public static function delete(): void {
+		delete_option( self::KEY );
+		delete_option( self::VKEY );
 	}
 
 	/**
@@ -207,7 +259,7 @@ final class Option {
 	 * @return bool
 	 */
 	public function should_allow_image(): bool {
-		return $this->allowImage;
+		return $this->allow_image;
 	}
 
 	/**
@@ -216,27 +268,7 @@ final class Option {
 	 * @return bool
 	 */
 	public function should_allow_font(): bool {
-		return $this->allowFont;
-	}
-
-	/**
-	 * Adds a default option.
-	 *
-	 * @return void
-	 */
-	public static function add_default() {
-		add_option( self::KEY, self::DEFAULT_OPTION );
-		add_option( self::VKEY, VERSION );
-	}
-
-	/**
-	 * Delete options
-	 *
-	 * @return void
-	 */
-	public static function delete() {
-		delete_option( self::KEY );
-		delete_option( self::VKEY );
+		return $this->allow_font;
 	}
 
 	/**
@@ -263,7 +295,7 @@ final class Option {
 	 * @return array The allowed header.
 	 */
 	public function get_allowed_header(): array {
-		return $this->allowedHeader;
+		return $this->allowed_header;
 	}
 
 	/**
@@ -272,7 +304,7 @@ final class Option {
 	 * @return array The list of allowed methods.
 	 */
 	public function get_allowed_methods(): array {
-		return $this->allowedMethods;
+		return $this->allowed_methods;
 	}
 
 	/**
@@ -281,7 +313,7 @@ final class Option {
 	 * @return bool
 	 */
 	public function should_allow_credentials(): bool {
-		return $this->allowCredentials;
+		return $this->allow_credentials;
 	}
 
 	/**
@@ -290,31 +322,9 @@ final class Option {
 	 * @return bool Returns true if the current origin is allowed, false otherwise.
 	 */
 	public function is_current_origin_allowed(): bool {
-		$websites = array_column( $this->allowedFor, 'value' );
+		$websites = array_column( $this->allowed_for, 'value' );
 
-		return in_array( rtrim( get_http_origin(), '/' ), $websites );
-	}
-
-	/**
-	 * Checks if the current request is a Cross-Origin Resource Sharing (CORS) request.
-	 *
-	 * @return bool Returns true if the request is a CORS request, false otherwise.
-	 */
-	public function is_cors_request(): bool {
-		$origin = get_http_origin();
-
-		if ( empty( $origin ) ) {
-			return false;
-		}
-
-		$origin_host = wp_parse_url( $origin, PHP_URL_HOST );
-		$host        = sanitize_url( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) );
-
-		if ( $origin_host === $host ) {
-			return false;
-		}
-
-		return true;
+		return in_array( rtrim( get_http_origin(), '/' ), $websites, true );
 	}
 
 	/**
@@ -323,7 +333,7 @@ final class Option {
 	 * @return bool
 	 */
 	public function has_methods(): bool {
-		return gettype( $this->allowedMethods ) === 'array' && ! empty( $this->allowedMethods );
+		return is_array( $this->allowed_methods ) && ! empty( $this->allowed_methods );
 	}
 
 	/**
@@ -332,7 +342,7 @@ final class Option {
 	 * @return bool Returns true if the object has a header, false otherwise.
 	 */
 	public function has_header(): bool {
-		return gettype( $this->allowedHeader ) === 'array' && ! empty( $this->allowedHeader );
+		return is_array( $this->allowed_header ) && ! empty( $this->allowed_header );
 	}
 
 	/**
@@ -341,9 +351,9 @@ final class Option {
 	 * @return bool Returns true if the method is allowed, false otherwise.
 	 */
 	public function is_method_allowed(): bool {
-		$method = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ?? false;
+		$method = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) );
 
-		return in_array( $method, $this->allowedMethods, true );
+		return ! empty( $method ) && in_array( $method, $this->allowed_methods, true );
 	}
 
 	/**
@@ -352,38 +362,33 @@ final class Option {
 	 * @return bool
 	 */
 	public function has_wildcard(): bool {
-		$websites = array_column( $this->allowedFor, 'value' );
+		$websites = array_column( $this->allowed_for, 'value' );
 
-		return 1 === count( $websites ) && in_array( '*', $websites );
+		return 1 === count( $websites ) && in_array( '*', $websites, true );
 	}
 
 	/**
-	 * Retrieves an array of domains from the 'allowedFor' property by parsing the 'value' field of each website.
+	 * Retrieves an array of domains from the 'allowed_for' property by parsing the 'value' field of each website.
 	 *
-	 * @return array An array of domains extracted from the 'value' field of each website in the 'allowedFor' property.
+	 * @return array An array of domains extracted from the 'value' field of each website in the 'allowed_for' property.
 	 */
 	public function get_domains(): array {
 		return array_map(
-			function ( $website ) {
+			static function ( $website ) {
 				return wp_parse_url( $website['value'], PHP_URL_HOST );
 			},
-			$this->allowedFor
+			$this->allowed_for
 		);
 	}
 
-	/**
-	 * Get the list of allowed websites for this function.
-	 *
-	 * @return array The list of allowed websites.
-	 */
-	public function get_allowed_for(): array {
-		return $this->allowedFor;
+	public function update_version() {
+		update_option( self::VKEY, VERSION );
 	}
 
 	/**
 	 * Prepend value to url
 	 *
-	 * @param array $url from allowedFor.
+	 * @param array $url from allowed_for.
 	 *
 	 * @return array of formatted url
 	 */
@@ -397,5 +402,14 @@ final class Option {
 		$url['value'] = sanitize_url( rtrim( $url['value'], '/' ) );
 
 		return $url;
+	}
+
+	/**
+	 * Retrieves the version number from the options table.
+	 *
+	 * @return string The version number stored in the options table associated with the VKEY.
+	 */
+	public function get_version(): string {
+		return get_option( self::VKEY, '1.0.0' );
 	}
 }
