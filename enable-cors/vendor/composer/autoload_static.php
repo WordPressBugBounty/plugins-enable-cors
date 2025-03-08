@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInite5e66ae1061fc98e0d4726c92d69d4fb
+class ComposerStaticInit893139e4d6078f360704c18395e69319
 {
     public static $prefixLengthsPsr4 = array (
         'E' => 
@@ -29,16 +29,15 @@ class ComposerStaticInite5e66ae1061fc98e0d4726c92d69d4fb
         'Enable\\Cors\\Plugin' => __DIR__ . '/../..' . '/src/Plugin.php',
         'Enable\\Cors\\SettingsApi' => __DIR__ . '/../..' . '/src/SettingsApi.php',
         'Enable\\Cors\\Traits\\Api' => __DIR__ . '/../..' . '/src/Traits/Api.php',
-        'Enable\\Cors\\Traits\\Singleton' => __DIR__ . '/../..' . '/src/Traits/Singleton.php',
         'Enable\\Cors\\Upgrade' => __DIR__ . '/../..' . '/src/Upgrade.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInite5e66ae1061fc98e0d4726c92d69d4fb::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInite5e66ae1061fc98e0d4726c92d69d4fb::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInite5e66ae1061fc98e0d4726c92d69d4fb::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit893139e4d6078f360704c18395e69319::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit893139e4d6078f360704c18395e69319::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit893139e4d6078f360704c18395e69319::$classMap;
 
         }, null, ClassLoader::class);
     }

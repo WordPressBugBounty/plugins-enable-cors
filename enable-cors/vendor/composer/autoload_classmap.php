@@ -14,6 +14,5 @@ return array(
     'Enable\\Cors\\Plugin' => $baseDir . '/src/Plugin.php',
     'Enable\\Cors\\SettingsApi' => $baseDir . '/src/SettingsApi.php',
     'Enable\\Cors\\Traits\\Api' => $baseDir . '/src/Traits/Api.php',
-    'Enable\\Cors\\Traits\\Singleton' => $baseDir . '/src/Traits/Singleton.php',
     'Enable\\Cors\\Upgrade' => $baseDir . '/src/Upgrade.php',
 );

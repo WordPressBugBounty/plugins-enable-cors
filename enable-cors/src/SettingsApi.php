@@ -1,4 +1,4 @@
-<?php //phpcs:ignore
+<?php
 
 namespace Enable\Cors;
 
@@ -14,7 +14,6 @@ if ( ! defined( 'Enable\Cors\SLUG' ) ) {
 use Enable\Cors\Helpers\Htaccess;
 use Enable\Cors\Helpers\Option;
 use Enable\Cors\Traits\Api;
-use Enable\Cors\Traits\Singleton;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,7 +21,6 @@ use WP_REST_Server;
 
 
 final class SettingsApi {
-	use Singleton;
 	use Api;
 
 	/**
@@ -35,7 +33,7 @@ final class SettingsApi {
 	/**
 	 * Initialize settings API
 	 */
-	private function __construct() {
+	public function __construct() {
 		register_rest_route(
 			$this->namespace,
 			'/settings',
@@ -72,7 +70,8 @@ final class SettingsApi {
 			$this->response['message'] = $saved->get_error_message();
 			$this->response['success'] = false;
 		} else {
-			Htaccess::instance()->modify();
+			$writer = new Htaccess();
+			$writer->modify();
 			wp_cache_flush();
 			$this->response['message'] = __( 'Settings Updated!', 'enable-cors' );
 			$this->response['success'] = true;

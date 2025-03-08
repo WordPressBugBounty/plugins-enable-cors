@@ -4,7 +4,7 @@ Donate link: https://www.buymeacoffee.com/devkabir011
 Tags: cors, error, fix, enable, ajax
 Requires at least: 4.7
 Tested up to: 6.7
-Stable tag: 1.2.4
+Stable tag: 2.0.0
 Requires PHP: 7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -109,9 +109,12 @@ I'm sorry to hear that you are experiencing issues with the plugin on your websi
 
 == Changelog ==
 
-= 1.2.4 - 14-12-2024 =
-* Improved workflow
-* PHP compatibility check till 8.3
+= 2.0.0 - 10-03-2024 =
+* Improved security checks for safer requests.
+* Better support for preflight requests to fix CORS issues.
+* Optimized allowed methods and headers for smoother API calls.
+* Removed unnecessary code to boost performance.
+* Checked and confirmed compatibility with PHP 8.4.
 
 ...
 

@@ -23,14 +23,15 @@ class Upgrade {
 	 * @return void
 	 */
 	public static function run() {
-		$current_version = Option::instance()->get_version();
+		$option          = new Option();
+		$current_version = $option->get_version();
 		if ( ! version_compare( $current_version, self::get_version(), '<' ) ) {
 			return;
 		}
 		// Run upgrade routines based on version comparison.
 		self::upgrade();
 		// Update current version.
-		Option::instance()->update_version();
+		$option->update_version();
 	}
 
 
@@ -38,13 +39,13 @@ class Upgrade {
 	 * Upgrade routines for latest version.
 	 *
 	 * @since 1.2.4
-	 * @return void
 	 */
 	private static function upgrade(): void {
 		switch ( VERSION ) {
 			case '1.2.4':
-				$data = Option::instance()->get();
-				// Rename keys
+				$option = new Option();
+				$data   = $option->get();
+				// Rename keys.
 				$data['allow_font'] = $data['allowFont'];
 				unset( $data['allowFont'] );
 
@@ -63,7 +64,7 @@ class Upgrade {
 				$data['allowed_header'] = $data['allowedHeader'];
 				unset( $data['allowedHeader'] );
 
-				Option::instance()->save( $data );
+				$option->save( $data );
 				break;
 			default:
 				break;

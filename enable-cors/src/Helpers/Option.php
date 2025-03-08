@@ -1,4 +1,4 @@
-<?php //phpcs:ignore
+<?php
 
 namespace Enable\Cors\Helpers;
 
@@ -14,14 +14,12 @@ if ( ! defined( 'Enable\Cors\SLUG' ) ) {
 use WP_Error;
 use const Enable\Cors\SLUG;
 use const Enable\Cors\VERSION;
-use Enable\Cors\Traits\Singleton;
 
 /**
  * Handle plugin option.
  */
 final class Option {
 
-	use Singleton;
 
 	/**
 	 * Plugin option key.
@@ -134,7 +132,7 @@ final class Option {
 	 * Set up options and set defaults.
 	 */
 	public function __construct() {
-		$options = get_option( self::KEY, self::DEFAULT_OPTION );
+		$options = get_site_option( self::KEY, self::DEFAULT_OPTION );
 		if ( array_key_exists( 'allowed_for', $options ) && is_string( $options['allowed_for'] ) ) {
 			$options['allowed_for'] = array(
 				array( 'value' => $options['allowed_for'] ),
@@ -158,7 +156,7 @@ final class Option {
 			return new WP_Error( 'invalid', __( 'Invalid Settings!', 'enable-cors' ) );
 		}
 
-		return update_option( self::KEY, $validated );
+		return update_site_option( self::KEY, $validated );
 	}
 
 	/**
@@ -220,8 +218,6 @@ final class Option {
 	 * Set options
 	 *
 	 * @param array $options from request.
-	 *
-	 * @return void
 	 */
 	private function set_option( array $options ): void {
 		$this->enable            = array_key_exists( 'enable', $options ) ? $options['enable'] : self::DEFAULT_OPTION['enable'];
@@ -235,28 +231,22 @@ final class Option {
 
 	/**
 	 * Adds a default option.
-	 *
-	 * @return void
 	 */
 	public static function add_default(): void {
-		update_option( self::KEY, self::DEFAULT_OPTION );
-		update_option( self::VKEY, VERSION );
+		update_site_option( self::KEY, self::DEFAULT_OPTION );
+		update_site_option( self::VKEY, VERSION );
 	}
 
 	/**
 	 * Delete options
-	 *
-	 * @return void
 	 */
 	public static function delete(): void {
-		delete_option( self::KEY );
-		delete_option( self::VKEY );
+		delete_site_option( self::KEY );
+		delete_site_option( self::VKEY );
 	}
 
 	/**
 	 * Should allow image for cors?
-	 *
-	 * @return bool
 	 */
 	public function should_allow_image(): bool {
 		return $this->allow_image;
@@ -264,8 +254,6 @@ final class Option {
 
 	/**
 	 * Should allow font for cors?
-	 *
-	 * @return bool
 	 */
 	public function should_allow_font(): bool {
 		return $this->allow_font;
@@ -277,7 +265,7 @@ final class Option {
 	 * @return array The options array.
 	 */
 	public function get(): array {
-		return get_option( self::KEY, self::DEFAULT_OPTION );
+		return get_site_option( self::KEY, self::DEFAULT_OPTION );
 	}
 
 	/**
@@ -309,8 +297,6 @@ final class Option {
 
 	/**
 	 * Checks if credentials are allowed.
-	 *
-	 * @return bool
 	 */
 	public function should_allow_credentials(): bool {
 		return $this->allow_credentials;
@@ -329,11 +315,9 @@ final class Option {
 
 	/**
 	 * Check if the method is allowed.
-	 *
-	 * @return bool
 	 */
 	public function has_methods(): bool {
-		return is_array( $this->allowed_methods ) && ! empty( $this->allowed_methods );
+		return ! empty( $this->allowed_methods );
 	}
 
 	/**
@@ -342,7 +326,7 @@ final class Option {
 	 * @return bool Returns true if the object has a header, false otherwise.
 	 */
 	public function has_header(): bool {
-		return is_array( $this->allowed_header ) && ! empty( $this->allowed_header );
+		return ! empty( $this->allowed_header );
 	}
 
 	/**
@@ -358,8 +342,6 @@ final class Option {
 
 	/**
 	 * Checks if the array of allowed websites contains a wildcard value.
-	 *
-	 * @return bool
 	 */
 	public function has_wildcard(): bool {
 		$websites = array_column( $this->allowed_for, 'value' );
@@ -381,8 +363,13 @@ final class Option {
 		);
 	}
 
+	/**
+	 * Updates the version number in the options table.
+	 *
+	 * @return void
+	 */
 	public function update_version() {
-		update_option( self::VKEY, VERSION );
+		update_site_option( self::VKEY, VERSION );
 	}
 
 	/**
@@ -410,6 +397,6 @@ final class Option {
 	 * @return string The version number stored in the options table associated with the VKEY.
 	 */
 	public function get_version(): string {
-		return get_option( self::VKEY, '1.0.0' );
+		return get_site_option( self::VKEY, '1.0.0' );
 	}
 }

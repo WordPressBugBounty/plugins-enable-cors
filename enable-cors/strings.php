@@ -124,22 +124,27 @@ return array(
 				'link_text'     => esc_attr__( 'Write a review', 'enable-cors' ),
 			),
 		),
-	),
-	'validation'  => array(
-		'website'  => array(
-			'title'       => esc_attr__( 'Invalid Website', 'enable-cors' ),
-			'description' => esc_attr__( 'Please enter valid website address. otherwise it may down your website', 'enable-cors' ),
-			'type'        => 'warning',
+		'apache'      => array(
+			'status'      => strpos( sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ?? '' ) ), 'Apache' ) === false,
+			'title'       => esc_attr__( 'Server Config', 'enable-cors' ),
+			'description' => esc_attr__( 'Your server is not Apache. We can not update server config from plugin, if cors is not enabled, please delete this plugin and hire a developer to fix it.', 'enable-cors' ),
 		),
-		'security' => array(
-			'title'       => esc_attr__( 'Security Warning', 'enable-cors' ),
-			'description' => sprintf( '<strong>*</strong> %s', esc_attr__( 'means that any website can send a request to your WordPress site and access the server\'s response. This can be a potential security risk.', 'enable-cors' ) ),
-			'type'        => 'error',
-		),
-		'unsaved'  => array(
-			'title'       => esc_attr__( 'Unsaved Settings', 'enable-cors' ),
-			'description' => esc_attr__( 'To enable CORS on your site, please save settings.', 'enable-cors' ),
-			'type'        => 'warning',
+		'validation'  => array(
+			'website'  => array(
+				'title'       => esc_attr__( 'Invalid Website', 'enable-cors' ),
+				'description' => esc_attr__( 'Please enter valid website address. otherwise it may down your website', 'enable-cors' ),
+				'type'        => 'warning',
+			),
+			'security' => array(
+				'title'       => esc_attr__( 'Security Warning', 'enable-cors' ),
+				'description' => sprintf( '<strong>*</strong> %s', esc_attr__( 'means that any website can send a request to your WordPress site and access the server\'s response. This can be a potential security risk.', 'enable-cors' ) ),
+				'type'        => 'error',
+			),
+			'unsaved'  => array(
+				'title'       => esc_attr__( 'Unsaved Settings', 'enable-cors' ),
+				'description' => esc_attr__( 'To enable CORS on your site, please save settings.', 'enable-cors' ),
+				'type'        => 'warning',
+			),
 		),
 	),
 );

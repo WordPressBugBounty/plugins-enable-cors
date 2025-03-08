@@ -1,4 +1,4 @@
-<?php //phpcs:ignore
+<?php
 
 namespace Enable\Cors;
 
@@ -11,29 +11,26 @@ if ( ! defined( 'Enable\Cors\SLUG' ) ) {
 	exit;
 }
 
-use Enable\Cors\Traits\Singleton;
 
 final class AdminPage {
-	use Singleton;
 
 	/**
 	 * Initialize admin page
 	 *
 	 * @return void
 	 */
-	private function __construct() {
+	public function __construct() {
 		add_action(
 			'admin_menu',
-			function () {
+			function (): void {
 				add_menu_page(
 					__( 'Enable CORS', 'enable-cors' ),
 					__( 'Enable CORS', 'enable-cors' ),
 					'manage_options',
 					SLUG,
-					function () {
+					function (): void {
 						wp_enqueue_style( SLUG );
 						wp_enqueue_script( SLUG );
-						add_filter( 'script_loader_tag', array( $this, 'add_module' ), 10, 3 );
 						add_filter( 'admin_footer_text', array( $this, 'credit' ) );
 						add_filter( 'update_footer', array( $this, 'version' ), 11 );
 						echo wp_kses_post( '<div id="' . SLUG . '">Loading scripts. If you are still here, something went wrong.</div>' );
@@ -46,24 +43,23 @@ final class AdminPage {
 		add_action( 'admin_enqueue_scripts', array( $this, 'scripts' ) );
 	}
 
-
-
 	/**
 	 * Register scripts
-	 *
-	 * @return void
 	 */
 	public function scripts(): void {
 		global $wp_filesystem;
 
 		if ( empty( $wp_filesystem ) ) {
-			require_once ABSPATH . '/wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/file.php';
 			WP_Filesystem();
 		}
 
-		if ( $wp_filesystem->exists( plugin_dir_path( FILE ) . 'assets/dist' ) ) {
-			wp_register_style( SLUG, plugins_url( 'assets/dist/style.css', FILE ), array(), VERSION );
-			wp_register_script( SLUG, plugins_url( 'assets/dist/script.js', FILE ), array(), VERSION, true );
+		if ( $wp_filesystem->exists( plugin_dir_path( FILE ) . 'assets/dist/manifest.json' ) ) {
+			$manifest = json_decode( $wp_filesystem->get_contents( plugin_dir_path( FILE ) . 'assets/dist/manifest.json' ), true );
+			$main_css = $manifest['src/main.js']['css'][0];
+			$main_js  = $manifest['src/main.js']['file'];
+			wp_register_style( SLUG, plugins_url( 'assets/dist/' . $main_css, FILE ), array(), VERSION );
+			wp_register_script( SLUG, plugins_url( 'assets/dist/' . $main_js, FILE ), array(), VERSION, true );
 		}
 
 		wp_add_inline_style( SLUG, '#wpcontent .notice, #wpcontent #message{display: none} input[type=checkbox]:checked::before{content:unset}' );
@@ -90,13 +86,14 @@ final class AdminPage {
 	/**
 	 * Add type="module" to script tags
 	 *
-	 * @param string $tag of script.
-	 * @param string $id of plugin script.
+	 * @param string $tag    The <code>&lt;script&gt;</code> tag for the enqueued script.
+	 * @param string $handle The script's registered handle.
+	 * @param string $src    The script's source URL.
 	 * @return string with type="module"
 	 */
-	public function add_module( string $tag, string $id ): string {
-		if ( SLUG === $id ) {
-			$tag = str_replace( '<script ', '<script type="module" ', $tag );
+	public function add_module( $tag, $handle, $src ): string {
+		if ( SLUG === $handle && false !== strpos( $src, SLUG ) ) {
+			return str_replace( '<script ', '<script type="module" ', $tag );
 		}
 
 		return $tag;
@@ -104,8 +101,6 @@ final class AdminPage {
 
 	/**
 	 * Version string for plugin footer
-	 *
-	 * @return string
 	 */
 	public function version(): string {
 		return sprintf( 'You are using <strong>%s</strong> version', VERSION );
@@ -113,8 +108,6 @@ final class AdminPage {
 
 	/**
 	 * Credit string for plugin footer
-	 *
-	 * @return string
 	 */
 	public function credit(): string {
 		return sprintf(

