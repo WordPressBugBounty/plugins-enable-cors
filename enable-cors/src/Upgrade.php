@@ -29,7 +29,7 @@ class Upgrade {
 			return;
 		}
 		// Run upgrade routines based on version comparison.
-		self::upgrade();
+		self::upgrade( $current_version );
 		// Update current version.
 		$option->update_version();
 	}
@@ -39,35 +39,27 @@ class Upgrade {
 	 * Upgrade routines for latest version.
 	 *
 	 * @since 1.2.4
+	 *
+	 * @param string $current_version The current version of the plugin.
 	 */
-	private static function upgrade(): void {
-		switch ( VERSION ) {
-			case '1.2.4':
-				$option = new Option();
-				$data   = $option->get();
-				// Rename keys.
-				$data['allow_font'] = $data['allowFont'];
-				unset( $data['allowFont'] );
-
-				$data['allow_image'] = $data['allowImage'];
-				unset( $data['allowImage'] );
-
-				$data['allow_credentials'] = $data['allowCredentials'];
-				unset( $data['allowCredentials'] );
-
-				$data['allowed_for'] = $data['allowedFor'];
-				unset( $data['allowedFor'] );
-
-				$data['allowed_methods'] = $data['allowedMethods'];
-				unset( $data['allowedMethods'] );
-
-				$data['allowed_header'] = $data['allowedHeader'];
-				unset( $data['allowedHeader'] );
-
-				$option->save( $data );
-				break;
-			default:
-				break;
+	private static function upgrade( string $current_version ): void {
+		if ( version_compare( $current_version, '1.2.4', '<' ) ) {
+			$option = new Option();
+			$data   = $option->get();
+			// Rename keys.
+			$data['allow_font'] = $data['allowFont'] ?? false;
+			unset( $data['allowFont'] );
+			$data['allow_image'] = $data['allowImage'] ?? false;
+			unset( $data['allowImage'] );
+			$data['allow_credentials'] = $data['allowCredentials'] ?? false;
+			unset( $data['allowCredentials'] );
+			$data['allowed_for'] = $data['allowedFor'] ?? array();
+			unset( $data['allowedFor'] );
+			$data['allowed_methods'] = $data['allowedMethods'] ?? array();
+			unset( $data['allowedMethods'] );
+			$data['allowed_header'] = $data['allowedHeader'] ?? array();
+			unset( $data['allowedHeader'] );
+			$option->save( $data );
 		}
 	}
 

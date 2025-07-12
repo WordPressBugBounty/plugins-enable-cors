@@ -39,7 +39,7 @@ final class AdminPage {
 				);
 			}
 		);
-		add_filter( 'script_loader_tag', array( $this, 'add_module' ), 10, 3 );
+		add_filter( 'script_loader_tag', array( $this, 'add_module' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'scripts' ) );
 	}
 
@@ -47,19 +47,8 @@ final class AdminPage {
 	 * Register scripts
 	 */
 	public function scripts(): void {
-		global $wp_filesystem;
-
-		if ( empty( $wp_filesystem ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-			WP_Filesystem();
-		}
-
-		if ( $wp_filesystem->exists( plugin_dir_path( FILE ) . 'assets/dist/manifest.json' ) ) {
-			$manifest = json_decode( $wp_filesystem->get_contents( plugin_dir_path( FILE ) . 'assets/dist/manifest.json' ), true );
-			$main_css = $manifest['src/main.js']['css'][0];
-			$main_js  = $manifest['src/main.js']['file'];
-			wp_register_style( SLUG, plugins_url( 'assets/dist/' . $main_css, FILE ), array(), VERSION );
-			wp_register_script( SLUG, plugins_url( 'assets/dist/' . $main_js, FILE ), array(), VERSION, true );
+		if ( ! $this->register_script() ) {
+			return;
 		}
 
 		wp_add_inline_style( SLUG, '#wpcontent .notice, #wpcontent #message{display: none} input[type=checkbox]:checked::before{content:unset}' );
@@ -68,6 +57,30 @@ final class AdminPage {
 			'enableCors',
 			$this->js_object()
 		);
+	}
+
+	/**
+	 * Registers the necessary styles and scripts for the admin page.
+	 *
+	 * @return bool True if scripts and styles are registered successfully, false otherwise.
+	 */
+	public function register_script(): bool {
+		global $wp_filesystem;
+
+		if ( empty( $wp_filesystem ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+
+		if ( $wp_filesystem->exists( plugin_dir_path( FILE ) . 'assets/dist/main.js' ) ) {
+			wp_register_style( SLUG, plugins_url( 'assets/dist/main.css', FILE ), array(), VERSION );
+			wp_register_script( SLUG, plugins_url( 'assets/dist/main.js', FILE ), array(), VERSION, true );
+			return true;
+		}
+
+		wp_register_style( SLUG, 'http://localhost:3000/src/main.css', array(), VERSION );
+		wp_register_script( SLUG, 'http://localhost:3000/src/main.js', array(), VERSION, true );
+		return true;
 	}
 
 	/**
@@ -88,11 +101,10 @@ final class AdminPage {
 	 *
 	 * @param string $tag    The <code>&lt;script&gt;</code> tag for the enqueued script.
 	 * @param string $handle The script's registered handle.
-	 * @param string $src    The script's source URL.
 	 * @return string with type="module"
 	 */
-	public function add_module( $tag, $handle, $src ): string {
-		if ( SLUG === $handle && false !== strpos( $src, SLUG ) ) {
+	public function add_module( $tag, $handle ): string {
+		if ( SLUG === $handle ) {
 			return str_replace( '<script ', '<script type="module" ', $tag );
 		}
 

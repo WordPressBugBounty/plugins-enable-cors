@@ -11,7 +11,7 @@
  * Plugin Name:       Enable CORS
  * Plugin URI:        https://www.fiverr.com/share/7kXeLW
  * Description:       Enable Cross-Origin Resource Sharing for any or specific origin.
- * Version:           2.0.1
+ * Version:           2.0.2
  * Requires at least: 4.7
  * Requires PHP:      7.1
  * Author:            Dev Kabir

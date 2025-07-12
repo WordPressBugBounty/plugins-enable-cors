@@ -78,24 +78,29 @@ return array(
 		'title'   => esc_attr__( 'Thank You', 'enable-cors' ),
 		'peoples' => array(
 			'philipschoettler' => array(
-				'name'    => esc_attr__( 'Philip Schöttler', 'enable-cors' ),
+				'name'    => esc_attr( 'Philip Schöttler' ),
 				'image'   => esc_attr( '267094f8008173f94e5e5d3e9b912cb5' ),
 				'profile' => esc_attr( 'philipschoettler' ),
 			),
 			'mehbubrashid'     => array(
-				'name'    => esc_attr__( 'Mehbub Rashid', 'enable-cors' ),
+				'name'    => esc_attr( 'Mehbub Rashid' ),
 				'image'   => esc_attr( '7a692106063b5b14dfe8962e83a738f0' ),
 				'profile' => esc_attr( 'mehbubrashid' ),
 			),
 			'oyvindwe'         => array(
-				'name'    => esc_attr__( 'oyvindwe', 'enable-cors' ),
+				'name'    => esc_attr( 'oyvindwe' ),
 				'image'   => esc_attr( '56c12316332438bb3dc6435cbe03da02' ),
 				'profile' => esc_attr( 'oyvindwe' ),
 			),
 			'kocevskiigorw'    => array(
-				'name'    => esc_attr__( 'kocevskiigorw', 'enable-cors' ),
+				'name'    => esc_attr( 'kocevskiigorw' ),
 				'image'   => esc_attr( 'f27a92b58dd8e8c810eac8a384d55731' ),
 				'profile' => esc_attr( 'kocevskiigorw' ),
+			),
+			'q00p'             => array(
+				'name'    => esc_attr( 'q00p' ),
+				'image'   => esc_attr( 'ef80385ec027a0f1ad466a7b33a6bdd27809a0d9ebc0385d1adf8c78745ef7c4' ),
+				'profile' => esc_attr( 'q00p' ),
 			),
 		),
 

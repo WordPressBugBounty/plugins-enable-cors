@@ -50,7 +50,7 @@ final class Headers {
 			$allowed_headers = implode( ', ', $option->get_allowed_header() );
 			header( 'Access-Control-Allow-Headers: ' . $allowed_headers );
 		} else {
-			header( 'Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization' ); // Default
+			header( 'Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization' ); // Default.
 		}
 
 		// Set credentials policy.

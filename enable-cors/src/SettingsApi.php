@@ -61,7 +61,7 @@ final class SettingsApi {
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 *
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response
 	 */
 	public function set( WP_REST_Request $request ) {
 		$json_params = $request->get_json_params();
@@ -84,7 +84,7 @@ final class SettingsApi {
 	/**
 	 * Get settings data from database
 	 *
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response
 	 */
 	public function get() {
 		$this->response['data'] = $this->option->get();
