@@ -3,8 +3,8 @@ Contributors: devkabir
 Donate link: https://www.buymeacoffee.com/devkabir011
 Tags: cors, error, fix, enable, ajax
 Requires at least: 4.7
-Tested up to: 6.8
-Stable tag: 2.0.2
+Tested up to: 7.0
+Stable tag: 2.0.3
 Requires PHP: 7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -15,7 +15,11 @@ Please read the plugin description before installing to ensure compatibility and
 
 Are you tired of dealing with pesky CORS errors on your website? Do you want to finally be able to access cross-origin resources with ease? Look no further! This plugin is here to solve all of your CORS issues. With just a few simple clicks, you can enable CORS support on your website and say goodbye to frustrating error messages. Plus, This tool is easy to use and compatible with all major browsers. Don't miss out on this game-changing solution! Try today and revolutionize the way you access cross-origin resources.
 
+[youtube https://youtu.be/HAcE67gnwT8]
+
 [youtube https://youtu.be/bFru6VCZ7KA]
+
+[youtube https://youtu.be/-WGML9mZmPo]
 
 
 ## What is CORS ? ##
@@ -108,6 +112,9 @@ I appreciate your understanding that this project is pursued in my spare time, o
 I'm sorry to hear that you are experiencing issues with the plugin on your website.
 
 == Changelog ==
+
+= 2.0.3 - 30-05-2026 =
+* Added PATCH method support for allowed HTTP methods
 
 = 2.0.2 - 10-07-2025 =
 * Removed vulnerable SweetAlert2 library and replaced with secure Notyf notifications

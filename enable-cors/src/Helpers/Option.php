@@ -52,6 +52,7 @@ final class Option {
 		'OPTIONS',
 		'PUT',
 		'DELETE',
+		'PATCH',
 	);
 	/**
 	 * List of allowed headers.
