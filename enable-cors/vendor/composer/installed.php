@@ -1,8 +1,8 @@
 <?php return array(
     'root' => array(
         'name' => 'devkabir/enable-cors',
-        'pretty_version' => '2.0.3',
-        'version' => '2.0.3.0',
+        'pretty_version' => '2.0.4',
+        'version' => '2.0.4.0',
         'reference' => null,
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
@@ -11,8 +11,8 @@
     ),
     'versions' => array(
         'devkabir/enable-cors' => array(
-            'pretty_version' => '2.0.3',
-            'version' => '2.0.3.0',
+            'pretty_version' => '2.0.4',
+            'version' => '2.0.4.0',
             'reference' => null,
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',

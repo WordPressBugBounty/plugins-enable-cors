@@ -4,7 +4,7 @@ Donate link: https://www.buymeacoffee.com/devkabir011
 Tags: cors, error, fix, enable, ajax
 Requires at least: 4.7
 Tested up to: 7.0
-Stable tag: 2.0.3
+Stable tag: 2.0.4
 Requires PHP: 7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -112,6 +112,9 @@ I appreciate your understanding that this project is pursued in my spare time, o
 I'm sorry to hear that you are experiencing issues with the plugin on your website.
 
 == Changelog ==
+
+= 2.0.4 - 10-06-2026 =
+* Security fix: removed hardcoded credential bypass in REST API permission callback
 
 = 2.0.3 - 30-05-2026 =
 * Added PATCH method support for allowed HTTP methods
