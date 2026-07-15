@@ -4,7 +4,7 @@ Donate link: https://www.buymeacoffee.com/devkabir011
 Tags: cors, error, fix, enable, ajax
 Requires at least: 4.7
 Tested up to: 7.0
-Stable tag: 2.0.4
+Stable tag: 2.1.0
 Requires PHP: 7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -112,6 +112,14 @@ I appreciate your understanding that this project is pursued in my spare time, o
 I'm sorry to hear that you are experiencing issues with the plugin on your website.
 
 == Changelog ==
+
+= 2.1.0 - 16-07-2026 =
+* Overhauled settings panel with modern premium grid-card layouts
+* Replaced old inline custom SVGs with standard Lucide vector icons
+* Fixed padding heights and vertical alignments of settings toggles and inputs
+* Resolved default paragraph margin conflicts within dashboard alert notices
+* Redesigned and simplified Toggle Switch component for perfect symmetry
+* Upgraded contributors list avatars with custom scale effects
 
 = 2.0.4 - 10-06-2026 =
 * Security fix: removed hardcoded credential bypass in REST API permission callback

@@ -24,6 +24,11 @@ final class Headers {
 	 * @param Option $option from DB.
 	 */
 	public static function add( Option $option ): void {
+		// Do not emit warnings or interfere with the response once output has started.
+		if ( headers_sent() ) {
+			return;
+		}
+
 		// Always set Vary: Origin for proper caching behavior.
 		header( 'Vary: Origin' );
 

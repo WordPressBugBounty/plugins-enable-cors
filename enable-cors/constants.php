@@ -10,7 +10,7 @@ if ( ! defined( 'Enable\Cors\SLUG' ) ) {
 }
 
 if ( ! defined( 'Enable\Cors\VERSION' ) ) {
-	define( 'Enable\Cors\VERSION', '2.0.4' );
+	define( 'Enable\Cors\VERSION', '2.1.0' );
 }
 
 if ( ! defined( 'Enable\Cors\DIR' ) ) {

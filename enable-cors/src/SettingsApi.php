@@ -65,7 +65,8 @@ final class SettingsApi {
 	 */
 	public function set( WP_REST_Request $request ) {
 		$json_params = $request->get_json_params();
-		$saved       = $this->option->save( $json_params );
+		$params      = is_array( $json_params ) ? $json_params : $request->get_body_params();
+		$saved       = $this->option->save( $params );
 		if ( is_wp_error( $saved ) ) {
 			$this->response['message'] = $saved->get_error_message();
 			$this->response['success'] = false;
