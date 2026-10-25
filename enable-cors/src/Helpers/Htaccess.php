@@ -43,13 +43,14 @@ final class Htaccess {
 
 	/**
 	 * It modifies the .htaccess file to add headers for allowing fonts and css
+	 *
+	 * @return bool False when the rules could not be written.
 	 */
-	public function modify(): void {
+	public function modify(): bool {
 		$option = new Option();
 
 		if ( ! $option->is_enable() ) {
-			$this->restore();
-			return;
+			return $this->restore();
 		}
 
 		$origin = false;
@@ -61,8 +62,8 @@ final class Htaccess {
 		} else {
 			$domains = $option->get_domains();
 			if ( array() !== $domains ) {
-				// Construct regex pattern for allowed domains.
-				$pattern = '^https?://(.+\.)?(' . implode( '|', array_map( 'preg_quote', $domains ) ) . ')$';
+				// Exact origin match only: a subdomain of an allowed domain is a different origin.
+				$pattern = '^(' . implode( '|', array_map( static fn( string $origin ) => preg_quote( $origin, '"' ), $domains ) ) . ')$';
 
 				// Environment variable for matching the origin.
 				$origin      = 'SetEnvIf Origin "' . $pattern . '" ORIGIN=$0' . PHP_EOL;
@@ -72,24 +73,20 @@ final class Htaccess {
 			}
 		}
 
-		if ( false === $origin ) {
-			return;
+		// No origin or no asset type qualifies: clear the block; PHP serves CORS for dynamic requests.
+		if ( false === $origin || ! ( $option->should_allow_font() || $option->should_allow_image() ) ) {
+			return $this->restore();
 		}
 
 		// Start building the .htaccess rules.
-		$lines   = array( '<IfModule mod_headers.c>' );
-		$lines[] = $origin;
-		$lines[] = $credentials ?? '';
+		$lines = array( '<IfModule mod_headers.c>' );
 
-		// CORS Headers for preflight requests.
 		if ( $option->has_methods() ) {
 			$methods = 'Header set Access-Control-Allow-Methods "' . implode( ', ', $option->get_allowed_methods() ) . '"';
-			$lines[] = $methods;
 		}
 
 		if ( $option->has_header() ) {
 			$headers = 'Header set Access-Control-Allow-Headers "' . implode( ', ', $option->get_allowed_header() ) . '"';
-			$lines[] = $headers;
 		}
 
 		// Allow CORS for Fonts.
@@ -115,7 +112,7 @@ final class Htaccess {
 		$lines[] = '</IfModule>';
 
 		// Write the rules to .htaccess.
-		$this->write( $lines );
+		return $this->write( $lines );
 	}
 
 	/**
@@ -123,8 +120,10 @@ final class Htaccess {
 	 * BEGIN and END markers.
 	 *
 	 * @param array $lines need to write.
+	 *
+	 * @return bool False when mod_rewrite is absent or the file is not writable.
 	 */
-	private function write( array $lines ): void {
+	private function write( array $lines ): bool {
 		// Ensure get_home_path() is declared.
 		if ( ! function_exists( 'get_home_path' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -136,16 +135,19 @@ final class Htaccess {
 
 		$htaccess_file = get_home_path() . '.htaccess';
 
-		if ( got_mod_rewrite() ) {
-			insert_with_markers( $htaccess_file, SLUG, $lines );
+		if ( ! got_mod_rewrite() ) {
+			return false;
 		}
+
+		return insert_with_markers( $htaccess_file, SLUG, $lines );
 	}
 
 	/**
 	 * It writes an empty array to the .htaccess file.
+	 *
+	 * @return bool False when the rules could not be cleared.
 	 */
-	public function restore(): void {
-		$lines = array( '' );
-		$this->write( $lines );
+	public function restore(): bool {
+		return $this->write( array( '' ) );
 	}
 }

@@ -11,6 +11,7 @@ if ( ! defined( 'Enable\Cors\SLUG' ) ) {
 	exit;
 }
 
+use Enable\Cors\Helpers\Htaccess;
 use Enable\Cors\Helpers\Option;
 use const Enable\Cors\VERSION;
 
@@ -20,14 +21,14 @@ class Upgrade {
 	 * Handles plugin upgrade routines based on version comparisons.
 	 *
 	 * @since 1.2.4
-	 * @return void
 	 */
-	public static function run() {
+	public static function run(): void {
 		$option          = new Option();
 		$current_version = $option->get_version();
 		if ( ! version_compare( $current_version, self::get_version(), '<' ) ) {
 			return;
 		}
+
 		// Run upgrade routines based on version comparison.
 		self::upgrade( $current_version );
 		// Update current version.
@@ -60,6 +61,11 @@ class Upgrade {
 			$data['allowed_header'] = $data['allowedHeader'] ?? array();
 			unset( $data['allowedHeader'] );
 			$option->save( $data );
+		}
+
+		if ( version_compare( $current_version, '3.0.0', '<' ) ) {
+			// Replace 2.x rules that matched any subdomain of an allowed origin.
+			( new Htaccess() )->modify();
 		}
 	}
 

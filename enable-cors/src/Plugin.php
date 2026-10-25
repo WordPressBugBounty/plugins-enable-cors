@@ -72,7 +72,7 @@ final class Plugin {
 		try {
 			if ( is_admin() ) {
 				// Add the settings link to the plugin actions.
-				add_filter( 'plugin_action_links_' . plugin_basename( FILE ), array( self::class, 'actions' ) );
+				add_filter( 'plugin_action_links_' . plugin_basename( FILE ), self::actions( ... ) );
 				// Initialize the admin page.
 				new AdminPage();
 			}
@@ -80,7 +80,7 @@ final class Plugin {
 			// Initialize the Settings API.
 			add_action(
 				'rest_api_init',
-				static function () {
+				static function (): void {
 					new SettingsApi();
 				}
 			);
@@ -88,18 +88,14 @@ final class Plugin {
 			// Get the option instance.
 			$option = new Option();
 
-			// If the plugin is not enabled or the method is not allowed, return.
-			if ( ! $option->is_enable() || ! $option->is_method_allowed() ) {
+			if ( ! $option->is_enable() ) {
 				return;
 			}
 
-			// Add the CORS headers.
-			Headers::add( $option );
-
-			// Remove the default CORS headers from the REST API.
+			// Register before method rejection or preflight exit.
 			add_action(
 				'rest_api_init',
-				static function () {
+				static function (): void {
 					remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
 
 					// Add a new filter to add the CORS headers.
@@ -119,10 +115,16 @@ final class Plugin {
 				}
 			);
 
+			if ( ! $option->is_method_allowed() ) {
+				return;
+			}
+
+			Headers::add( $option );
+
 			// Run the upgrade routines.
 			Upgrade::run();
-		} catch ( \Throwable $th ) {
-			error_log( $th->getMessage() ); // phpcs:ignore
+		} catch ( \Throwable $throwable ) {
+			error_log( $throwable->getMessage() ); // phpcs:ignore
 		}
 	}
 

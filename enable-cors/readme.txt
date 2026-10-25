@@ -2,10 +2,10 @@
 Contributors: devkabir
 Donate link: https://www.buymeacoffee.com/devkabir011
 Tags: cors, error, fix, enable, ajax
-Requires at least: 4.7
-Tested up to: 7.0
-Stable tag: 2.1.0
-Requires PHP: 7.1
+Requires at least: 6.5
+Tested up to: 7.1
+Stable tag: 3.0.0
+Requires PHP: 8.2.35
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -113,6 +113,20 @@ I'm sorry to hear that you are experiencing issues with the plugin on your websi
 
 == Changelog ==
 
+= 3.0.0 - 26-10-2026 =
+* Breaking: requires PHP 8.2 and WordPress 6.5
+* Breaking: allowed origins now match exactly; subdomains must be added separately
+* Fixed: CORS headers are sent only for allowed methods; preflights check the requested method
+* Changed: OPTIONS is always allowed for preflights and removed from the method list
+* Added: X-WP-Nonce to allowed headers
+* Fixed: credentials are no longer sent with a wildcard origin
+* Fixed: multisite settings require the manage_network_options capability
+* Fixed: settings with unknown keys are rejected; partial saves keep existing values
+* Fixed: settings save reports when .htaccess could not be updated
+* Changed: .htaccess rules are written only when font or image CORS is enabled
+* Fixed: long text wrapping in the settings panel
+* Tested up to WordPress 7.1
+
 = 2.1.0 - 16-07-2026 =
 * Overhauled settings panel with modern premium grid-card layouts
 * Replaced old inline custom SVGs with standard Lucide vector icons
@@ -153,3 +167,8 @@ I'm sorry to hear that you are experiencing issues with the plugin on your websi
 * Added multiple website options.
 * Added request method check.
 * Note:: This plugin does not help on Google Analytics issues.
+
+== Upgrade Notice ==
+
+= 3.0.0 =
+Requires PHP 8.2 and WordPress 6.5. Allowed origins now match exactly, so add each subdomain you want to allow.

@@ -27,6 +27,7 @@ final class Option {
 	 * @var string
 	 */
 	private const KEY = SLUG . '-options';
+
 	/**
 	 * Default options for the API.
 	 *
@@ -38,22 +39,23 @@ final class Option {
 		'allow_image'       => false,
 		'allow_credentials' => false,
 		'allowed_for'       => array( array( 'value' => '*' ) ),
-		'allowed_methods'   => array( 'GET', 'POST', 'OPTIONS' ),
+		'allowed_methods'   => array( 'GET', 'POST' ),
 		'allowed_header'    => array(),
 	);
+
 	/**
-	 * List of allowed HTTP methods.
+	 * Configurable methods; OPTIONS is always allowed.
 	 *
 	 * @var array
 	 */
 	private const METHODS = array(
 		'GET',
 		'POST',
-		'OPTIONS',
 		'PUT',
 		'DELETE',
 		'PATCH',
 	);
+
 	/**
 	 * List of allowed headers.
 	 *
@@ -64,22 +66,11 @@ final class Option {
 		'Authorization',
 		'Content-Type',
 		'Origin',
+		'X-WP-Nonce',
 	);
-	/**
-	 * An array of allowed keys.
-	 *
-	 * @var array
-	 */
-	private const ALLOWED = array(
-		'enable',
-		'allow_font',
-		'allow_image',
-		'allow_credentials',
-		'allowed_for',
-		'allowed_methods',
-		'allowed_header',
-	);
-	public const VKEY     = SLUG . '_version';
+
+	public const VKEY = SLUG . '_version';
+
 	/**
 	 * Array of allowed headers.
 	 *
@@ -140,6 +131,7 @@ final class Option {
 			);
 			$this->save( $options );
 		}
+
 		$this->set_option( $options );
 	}
 
@@ -153,11 +145,12 @@ final class Option {
 	public function save( array $options ) {
 		$validated = $this->validate( $options );
 
-		if ( empty( $validated ) ) {
+		// Unknown keys (e.g. camelCase) would otherwise be dropped silently.
+		if ( array() === $validated || array() !== array_diff_key( $options, self::DEFAULT_OPTION ) ) {
 			return new WP_Error( 'invalid', __( 'Invalid Settings!', 'enable-cors' ) );
 		}
 
-		return update_site_option( self::KEY, $validated );
+		return update_site_option( self::KEY, array_merge( $this->get(), $validated ) );
 	}
 
 	/**
@@ -168,51 +161,47 @@ final class Option {
 	 * @return array of verified data
 	 */
 	private function validate( array $get_json_params ): array {
-		$data = $this->extract( $get_json_params, self::ALLOWED );
+		$data = array_intersect_key( $get_json_params, self::DEFAULT_OPTION );
 
 		array_walk(
 			$data,
-			function ( &$value, $key ) {
+			function ( &$value, $key ): void {
 				switch ( $key ) {
 					case 'allowed_for':
-						if ( ! is_array( $value ) || empty( $value ) || in_array( '*', array_column( $value, 'value' ), true ) ) {
+						$value = is_array( $value )
+							? array_filter( $value, static fn( $origin ) => is_array( $origin ) && is_string( $origin['value'] ?? null ) )
+							: array();
+						if ( in_array( '*', array_column( $value, 'value' ), true ) ) {
 							$value = self::DEFAULT_OPTION['allowed_for'];
+							break;
 						}
-						$value = array_map( array( $this, 'prepend_value' ), $value );
+
+						$value = array() === $value
+							? null
+							: array_map( $this->prepend_value( ... ), $value );
 						break;
 					case 'allowed_methods':
 						if ( ! is_array( $value ) ) {
 							$value = self::DEFAULT_OPTION['allowed_methods'];
 						}
-						$value = array_map( 'sanitize_text_field', array_filter( array_intersect( $value, self::METHODS ) ) );
+
+						$value = array_map( sanitize_text_field( ... ), array_filter( array_intersect( $value, self::METHODS ) ) );
 						break;
 					case 'allowed_header':
 						if ( ! is_array( $value ) ) {
 							$value = self::DEFAULT_OPTION['allowed_header'];
 						}
-						$value = array_map( 'sanitize_text_field', array_filter( array_intersect( $value, self::HEADERS ) ) );
+
+						$value = array_map( sanitize_text_field( ... ), array_filter( array_intersect( $value, self::HEADERS ) ) );
 						break;
 					default:
-						$value = sanitize_text_field( $value );
-						$value = (bool) $value;
+						$value = is_scalar( $value ) && (bool) sanitize_text_field( (string) $value );
 						break;
 				}
 			}
 		);
 
-		return $data;
-	}
-
-	/**
-	 * Extract data from array
-	 *
-	 * @param array $collection of data.
-	 * @param array $keys to extract.
-	 *
-	 * @return array of extracted data
-	 */
-	private function extract( array $collection, array $keys ): array {
-		return array_intersect_key( $collection, array_flip( $keys ) );
+		return array_filter( $data, static fn( $value ) => null !== $value );
 	}
 
 	/**
@@ -300,7 +289,8 @@ final class Option {
 	 * Checks if credentials are allowed.
 	 */
 	public function should_allow_credentials(): bool {
-		return $this->allow_credentials;
+		// Browsers reject credentials with a wildcard origin.
+		return $this->allow_credentials && ! $this->has_wildcard();
 	}
 
 	/**
@@ -309,9 +299,9 @@ final class Option {
 	 * @return bool Returns true if the current origin is allowed, false otherwise.
 	 */
 	public function is_current_origin_allowed(): bool {
-		$websites = array_column( $this->allowed_for, 'value' );
+		$origin = rtrim( get_http_origin(), '/' );
 
-		return in_array( rtrim( get_http_origin(), '/' ), $websites, true );
+		return '' !== $origin && in_array( $origin, $this->get_domains(), true );
 	}
 
 	/**
@@ -338,7 +328,8 @@ final class Option {
 	public function is_method_allowed(): bool {
 		$method = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) );
 
-		return ! empty( $method ) && in_array( $method, $this->allowed_methods, true );
+		// Preflights bypass method selection.
+		return 'OPTIONS' === $method || in_array( $method, $this->allowed_methods, true );
 	}
 
 	/**
@@ -351,25 +342,33 @@ final class Option {
 	}
 
 	/**
-	 * Retrieves an array of domains from the 'allowed_for' property by parsing the 'value' field of each website.
+	 * Retrieves the exact origins (scheme://host[:port]) from the 'allowed_for' property.
 	 *
-	 * @return array An array of domains extracted from the 'value' field of each website in the 'allowed_for' property.
+	 * Malformed entries are dropped; an empty branch in the .htaccess alternation would match any origin.
+	 *
+	 * @return array An array of origins built from the 'value' field of each website in the 'allowed_for' property.
 	 */
 	public function get_domains(): array {
-		return array_map(
-			static function ( $website ) {
-				return wp_parse_url( $website['value'], PHP_URL_HOST );
+		$origins = array_map(
+			static function ( array $website ) {
+				$parts = wp_parse_url( $website['value'] ?? '' );
+
+				if ( empty( $parts['scheme'] ) || empty( $parts['host'] ) ) {
+					return null;
+				}
+
+				return $parts['scheme'] . '://' . $parts['host'] . ( empty( $parts['port'] ) ? '' : ':' . $parts['port'] );
 			},
 			$this->allowed_for
 		);
+
+		return array_values( array_filter( $origins ) );
 	}
 
 	/**
 	 * Updates the version number in the options table.
-	 *
-	 * @return void
 	 */
-	public function update_version() {
+	public function update_version(): void {
 		update_site_option( self::VKEY, VERSION );
 	}
 
@@ -384,9 +383,11 @@ final class Option {
 		if ( ! array_key_exists( 'value', $url ) ) {
 			return $url;
 		}
+
 		if ( '*' === $url['value'] ) {
 			return $url;
 		}
+
 		$url['value'] = sanitize_url( rtrim( $url['value'], '/' ) );
 
 		return $url;

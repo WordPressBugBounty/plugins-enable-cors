@@ -14,7 +14,6 @@ if ( ! defined( 'Enable\Cors\SLUG' ) ) {
 use Enable\Cors\Helpers\Htaccess;
 use Enable\Cors\Helpers\Option;
 use Enable\Cors\Traits\Api;
-use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -28,7 +27,7 @@ final class SettingsApi {
 	 *
 	 * @var Option
 	 */
-	private $option;
+	private Option $option;
 
 	/**
 	 * Initialize settings API
@@ -41,13 +40,13 @@ final class SettingsApi {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get' ),
-					'permission_callback' => array( $this, 'permissions_check' ),
+					'permission_callback' => $this->permissions_check( ... ),
 					'args'                => array(),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'set' ),
-					'permission_callback' => array( $this, 'permissions_check' ),
+					'permission_callback' => $this->permissions_check( ... ),
 					'args'                => array(),
 				),
 			)
@@ -65,18 +64,20 @@ final class SettingsApi {
 	 */
 	public function set( WP_REST_Request $request ) {
 		$json_params = $request->get_json_params();
-		$params      = is_array( $json_params ) ? $json_params : $request->get_body_params();
-		$saved       = $this->option->save( $params );
+		$saved       = $this->option->save( $json_params );
 		if ( is_wp_error( $saved ) ) {
 			$this->response['message'] = $saved->get_error_message();
 			$this->response['success'] = false;
+		} elseif ( ! ( new Htaccess() )->modify() && got_mod_rewrite() ) {
+			// Non-Apache servers have no .htaccess to write; only a failed Apache write is an error.
+			$this->response['message'] = __( 'Settings saved, but .htaccess could not be updated.', 'enable-cors' );
+			$this->response['success'] = false;
 		} else {
-			$writer = new Htaccess();
-			$writer->modify();
 			wp_cache_flush();
 			$this->response['message'] = __( 'Settings Updated!', 'enable-cors' );
 			$this->response['success'] = true;
 		}
+
 		$this->response['data'] = $this->option->get();
 
 		return rest_ensure_response( $this->response );

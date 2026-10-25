@@ -16,8 +16,6 @@ final class AdminPage {
 
 	/**
 	 * Initialize admin page
-	 *
-	 * @return void
 	 */
 	public function __construct() {
 		add_action(
@@ -26,21 +24,21 @@ final class AdminPage {
 				add_menu_page(
 					__( 'Enable CORS', 'enable-cors' ),
 					__( 'Enable CORS', 'enable-cors' ),
-					'manage_options',
+					is_multisite() ? 'manage_network_options' : 'manage_options',
 					SLUG,
 					function (): void {
 						wp_enqueue_style( SLUG );
 						wp_enqueue_script( SLUG );
-						add_filter( 'admin_footer_text', array( $this, 'credit' ) );
-						add_filter( 'update_footer', array( $this, 'version' ), 11 );
+						add_filter( 'admin_footer_text', $this->credit( ... ) );
+						add_filter( 'update_footer', $this->version( ... ), 11 );
 						echo wp_kses_post( '<div id="' . SLUG . '">Loading scripts. If you are still here, something went wrong.</div>' );
 					},
 					'dashicons-admin-generic'
 				);
 			}
 		);
-		add_filter( 'script_loader_tag', array( $this, 'add_module' ), 10, 2 );
-		add_action( 'admin_enqueue_scripts', array( $this, 'scripts' ) );
+		add_filter( 'script_loader_tag', $this->add_module( ... ), 10, 2 );
+		add_action( 'admin_enqueue_scripts', $this->scripts( ... ) );
 	}
 
 	/**
@@ -62,6 +60,8 @@ final class AdminPage {
 	/**
 	 * Registers the necessary styles and scripts for the admin page.
 	 *
+	 * @global \WP_Filesystem_Base $wp_filesystem WordPress filesystem object for file operations.
+	 *
 	 * @return bool True if scripts and styles are registered successfully, false otherwise.
 	 */
 	public function register_script(): bool {
@@ -78,8 +78,6 @@ final class AdminPage {
 			return true;
 		}
 
-		wp_register_style( SLUG, 'http://localhost:3000/src/main.css', array(), VERSION );
-		wp_register_script( SLUG, 'http://localhost:3000/src/main.js', array(), VERSION, true );
 		return true;
 	}
 

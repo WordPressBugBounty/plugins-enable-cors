@@ -24,8 +24,12 @@ final class Headers {
 	 * @param Option $option from DB.
 	 */
 	public static function add( Option $option ): void {
-		// Do not emit warnings or interfere with the response once output has started.
-		if ( headers_sent() ) {
+		$method = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) );
+		// Preflights must request an allowed method.
+		if ( 'OPTIONS' === $method ) {
+			$method = sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'] ?? '' ) );
+		}
+		if ( ! in_array( $method, $option->get_allowed_methods(), true ) ) {
 			return;
 		}
 
@@ -55,7 +59,7 @@ final class Headers {
 			$allowed_headers = implode( ', ', $option->get_allowed_header() );
 			header( 'Access-Control-Allow-Headers: ' . $allowed_headers );
 		} else {
-			header( 'Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization' ); // Default.
+			header( 'Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization, X-WP-Nonce' ); // Default.
 		}
 
 		// Set credentials policy.
